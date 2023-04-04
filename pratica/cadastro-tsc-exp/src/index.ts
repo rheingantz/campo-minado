@@ -3,10 +3,11 @@ import express from "express";
 import { Router, Request, Response } from "express";
 
 import fs from "fs";
+import { json } from "stream/consumers";
 
 const app = express();
 const route = Router();
-const dataPath = "../database/client.json";
+const dataPath = "../database/client.json"
 const data = require(dataPath);
 const clients: IclientInterface[] = data;
 
@@ -26,7 +27,7 @@ interface IclientInterface {
 
 function saveDataJson(data: IclientInterface[]) {
   const dataString = JSON.stringify(data);
-  return fs.writeFileSync(dataPath, dataString);
+  return fs.writeFileSync("./database/client.json", dataString);
 }
 
 function bodyVerify(returnApi: any, currentId: string) {
@@ -60,7 +61,7 @@ function verifyItemBody(body: any): { isValid: boolean; message: string } {
   if (!body.age || typeof body.age !== "number") {
     return {
       isValid: false,
-      message: "age invalida. Campo age é obrigatório e deve receber um número",
+      message: "Age invalida. Campo age é obrigatório e deve receber um número",
     };
   }
 
@@ -111,19 +112,18 @@ function createIdByUser(name: string, email: string): string {
 app.use(express.json());
 
 route.get("/listPritner", (req: Request, res: Response) => {
-  res.json(clients);
+  res.json(data);
 });
 
 route.post("/addClient", (req: Request, res: Response) => {
   const body = req.body;
-  console.log(body);
   const validBody = verifyItemBody(body);
   if (validBody.isValid) {
     let idClient = createIdByUser(body.name, body.email);
     let client = bodyVerify(body, idClient);
     clients.push(client);
-    saveDataJson(clients);
     res.json({ message: "Cliente cadastrado com sucesso" });
+    saveDataJson(clients);    
   } else {
     res.json({ message: "Cliente não cadastrado" });
   }
